@@ -240,15 +240,16 @@ class OAuth2Authentication(BaseAuthentication):
         return True, {'username': username}
 
     def __is_any_claim_valid(self, identity, additional_claims):
+        valid = True
+        reason = "Claim match found. Authorizing"
         if additional_claims is None:
             reason = "Additional claim config is None, no check to do."
-            return (True, reason)
-        if not isinstance(additional_claims, dict):
-            reason = "Additional claim check config is not a dict."
-            return (False, reason)
-        if additional_claims.keys() is None:
-            reason = "Additional claim check config dict is empty."
-            return (False, reason)
+            return valid, reason
+        elif not isinstance(additional_claims, dict) or \
+            not bool(additional_claims):
+            reason = "Additional claim config is not a dict or a empty dict"
+            valid = False
+            return valid, reason
         for key in additional_claims.keys():
             claim = identity.get(key)
             if claim is None:
