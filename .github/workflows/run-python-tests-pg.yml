@@ -105,7 +105,6 @@ jobs:
         run: |
           echo local all all trust > /usr/local/var/postgresql@${{ matrix.pgver }}/pg_hba.conf
           sed -i '' "s/#port = 543[0-9]/port = 59${{ matrix.pgver }}/g" /usr/local/var/postgresql@${{ matrix.pgver }}/postgresql.conf
-          sudo sed -i "s/#shared_preload_libraries = ''/shared_preload_libraries = '\$libdir\/plugin_debugger'/g" /usr/local/var/postgresql@${{ matrix.pgver }}/postgresql.conf
           grep "^max_connections" /usr/local/var/postgresql@${{ matrix.pgver }}/postgresql.conf 
           brew services restart postgresql@${{ matrix.pgver }}
           
@@ -284,13 +283,14 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest' }}
         run: |
           . venv/bin/activate
-          make check-python
+          cd web
+          python regression/runtests.py --exclude feature_tests --pkg tools
 
       - name: Run the tests on Windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           call venv\Scripts\activate.bat
-          python web\regression\runtests.py --exclude feature_tests
+          python web\regression\runtests.py --exclude feature_tests --pkg tools
         shell: cmd
 
       - name: Archive server log
