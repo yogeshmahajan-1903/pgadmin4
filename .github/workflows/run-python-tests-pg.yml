@@ -282,13 +282,13 @@ jobs:
         run: |
           . venv/bin/activate
           cd web
-          python regression/runtests.py --exclude feature_tests --pkg browser,tools
+          python regression/runtests.py --exclude feature_tests --pkg preferences
 
       - name: Run the tests on Windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           call venv\Scripts\activate.bat
-          python web\regression\runtests.py --exclude feature_tests --pkg browser,tools
+          python web\regression\runtests.py --exclude feature_tests --pkg preferences
         shell: cmd
 
       - name: Archive server log
