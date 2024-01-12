@@ -114,8 +114,6 @@ jobs:
           done
           
           psql postgres -p 59${{ matrix.pgver }} -c 'CREATE ROLE postgres SUPERUSER LOGIN;'
-          psql -U postgres -p 59${{ matrix.pgver }} -c 'CREATE EXTENSION pgagent;'
-          psql -U postgres -p 59${{ matrix.pgver }} -c 'CREATE EXTENSION pldbgapi;'
 
       - name: Install Python dependencies on Linux and macOS
         if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest' }}
