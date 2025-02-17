@@ -13,8 +13,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: Are we really on debian Linux?
       run: |
-        cat /etc/os-release
         lsb_release -a
+        cat /etc/os-release
 #    - name: Setup the PGDG APT repo
 #      run: |
 #        sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
