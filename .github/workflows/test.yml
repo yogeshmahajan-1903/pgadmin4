@@ -25,8 +25,8 @@ jobs:
 #        sudo dnf install -y libpq-dev libffi-dev libssl-dev libkrb5-dev zlib1g-dev postgresql-${{ matrix.pgver }} postgresql-${{ matrix.pgver }}-pldebugger pgagent
     - name: Create the tablespace directory
       run: |
-        sudo mkdir -p /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
-        sudo chown postgres:postgres /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
+        mkdir -p /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
+        chown postgres:postgres /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
 #    - name: Re-create stats directory, just in case
 #      run: |
 #        sudo rm -rf /var/run/postgresql/${{ matrix.pgver }}-main.pg_stat_tmp/
