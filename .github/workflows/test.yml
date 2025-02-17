@@ -10,7 +10,7 @@ jobs:
       image: rockylinux/rockylinux:9
       #image: debian:12
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Are we really on debian Linux?
       run: |
         cat /etc/os-release
