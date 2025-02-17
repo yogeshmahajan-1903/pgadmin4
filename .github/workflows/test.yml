@@ -7,23 +7,24 @@ jobs:
   distribution-check:
     runs-on: ubuntu-latest
     container:
-      #image: rockylinux/rockylinux:9
-      image: debian:12
+      image: rockylinux/rockylinux:9
+      #image: debian:12
     steps:
     - uses: actions/checkout@v1
     - name: Are we really on debian Linux?
       run: |
-        uname -a
+        cat /etc/os-release
 
     - name: Setup the PGDG APT repo
       run: |
-        sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+        sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+#        sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+#        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 
     - name: Install platform dependencies
       run: |
-        sudo apt update
-        sudo apt install -y libpq-dev libffi-dev libssl-dev libkrb5-dev zlib1g-dev postgresql-${{ matrix.pgver }} postgresql-${{ matrix.pgver }}-pldebugger pgagent
+        sudo yum update
+        sudo dnf install -y libpq-dev libffi-dev libssl-dev libkrb5-dev zlib1g-dev postgresql-${{ matrix.pgver }} postgresql-${{ matrix.pgver }}-pldebugger pgagent
 
     - name: Create the tablespace directory
       run: |
