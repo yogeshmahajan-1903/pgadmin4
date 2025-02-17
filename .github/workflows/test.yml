@@ -7,13 +7,13 @@ jobs:
   distribution-check:
     runs-on: ubuntu-latest
     container:
-      image: rockylinux/rockylinux:9
-      #image: debian:12
+      #image: rockylinux/rockylinux:9
+      image: debian:12
     steps:
     - uses: actions/checkout@v4
     - name: Are we really on debian Linux?
       run: |
-        cat /etc/os-release
+        uname -a
 #    - name: Setup the PGDG APT repo
 #      run: |
 #        sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
@@ -26,7 +26,7 @@ jobs:
     - name: Create the tablespace directory
       run: |
         mkdir -p /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
-        chown postgres:postgres /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
+#        chown postgres:postgres /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
 #    - name: Re-create stats directory, just in case
 #      run: |
 #        sudo rm -rf /var/run/postgresql/${{ matrix.pgver }}-main.pg_stat_tmp/
