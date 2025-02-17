@@ -14,38 +14,38 @@ jobs:
     - name: Are we really on debian Linux?
       run: |
         cat /etc/os-release
-    - name: Setup the PGDG APT repo
-      run: |
-        sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-#        sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-#        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-    - name: Install platform dependencies
-      run: |
-        sudo yum update
-        sudo dnf install -y libpq-dev libffi-dev libssl-dev libkrb5-dev zlib1g-dev postgresql-${{ matrix.pgver }} postgresql-${{ matrix.pgver }}-pldebugger pgagent
-    - name: Create the tablespace directory
-      run: |
-        sudo mkdir -p /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
-        sudo chown postgres:postgres /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
-    - name: Re-create stats directory, just in case
-      run: |
-        sudo rm -rf /var/run/postgresql/${{ matrix.pgver }}-main.pg_stat_tmp/
-        sudo mkdir -p /var/run/postgresql/${{ matrix.pgver }}-main.pg_stat_tmp/
-        sudo chown postgres:postgres /var/run/postgresql/${{ matrix.pgver }}-main.pg_stat_tmp/
-    - name: Start PostgreSQL
-      run: |
-        sudo su -c "echo local all all trust > /etc/postgresql/${{ matrix.pgver }}/main/pg_hba.conf"
-        sudo sed -i "s/port = 543[0-9]/port = 59${{ matrix.pgver }}/g" /etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf
-        sudo sed -i "s/#shared_preload_libraries = ''/shared_preload_libraries = '\$libdir\/plugin_debugger'/g" /etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf
-        sudo su - postgres -c "/usr/lib/postgresql/${{ matrix.pgver }}/bin/postgres -D /var/lib/postgresql/${{ matrix.pgver }}/main -c config_file=/etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf &"
-
-        until sudo runuser -l postgres -c "pg_isready -p 59${{ matrix.pgver }}" 2>/dev/null; do
-          >&2 echo "Postgres is unavailable - sleeping for 2 seconds"
-          sleep 2
-        done
-
-        psql -U postgres -p 59${{ matrix.pgver }} -c 'CREATE EXTENSION pgagent;'
-        psql -U postgres -p 59${{ matrix.pgver }} -c 'CREATE EXTENSION pldbgapi;'
+#    - name: Setup the PGDG APT repo
+#      run: |
+#        sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+##        sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+##        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+#    - name: Install platform dependencies
+#      run: |
+#        sudo yum update
+#        sudo dnf install -y libpq-dev libffi-dev libssl-dev libkrb5-dev zlib1g-dev postgresql-${{ matrix.pgver }} postgresql-${{ matrix.pgver }}-pldebugger pgagent
+#    - name: Create the tablespace directory
+#      run: |
+#        sudo mkdir -p /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
+#        sudo chown postgres:postgres /var/lib/postgresql/tablespaces/${{ matrix.pgver }}
+#    - name: Re-create stats directory, just in case
+#      run: |
+#        sudo rm -rf /var/run/postgresql/${{ matrix.pgver }}-main.pg_stat_tmp/
+#        sudo mkdir -p /var/run/postgresql/${{ matrix.pgver }}-main.pg_stat_tmp/
+#        sudo chown postgres:postgres /var/run/postgresql/${{ matrix.pgver }}-main.pg_stat_tmp/
+#    - name: Start PostgreSQL
+#      run: |
+#        sudo su -c "echo local all all trust > /etc/postgresql/${{ matrix.pgver }}/main/pg_hba.conf"
+#        sudo sed -i "s/port = 543[0-9]/port = 59${{ matrix.pgver }}/g" /etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf
+#        sudo sed -i "s/#shared_preload_libraries = ''/shared_preload_libraries = '\$libdir\/plugin_debugger'/g" /etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf
+#        sudo su - postgres -c "/usr/lib/postgresql/${{ matrix.pgver }}/bin/postgres -D /var/lib/postgresql/${{ matrix.pgver }}/main -c config_file=/etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf &"
+#
+#        until sudo runuser -l postgres -c "pg_isready -p 59${{ matrix.pgver }}" 2>/dev/null; do
+#          >&2 echo "Postgres is unavailable - sleeping for 2 seconds"
+#          sleep 2
+#        done
+#
+#        psql -U postgres -p 59${{ matrix.pgver }} -c 'CREATE EXTENSION pgagent;'
+#        psql -U postgres -p 59${{ matrix.pgver }} -c 'CREATE EXTENSION pldbgapi;'
 
     - name: Install Python dependencies
       run: make install-python-testing
