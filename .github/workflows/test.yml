@@ -14,9 +14,6 @@ jobs:
     - name: Are we really on debian Linux?
       run: |
         cat /etc/os-release
-    - uses: actions/checkout@v4
-    - name: Are we really on debian Linux22?
-      run: |
         lsb_release -a
 #    - name: Setup the PGDG APT repo
 #      run: |
