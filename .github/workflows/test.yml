@@ -47,8 +47,8 @@ jobs:
 #        psql -U postgres -p 59${{ matrix.pgver }} -c 'CREATE EXTENSION pgagent;'
 #        psql -U postgres -p 59${{ matrix.pgver }} -c 'CREATE EXTENSION pldbgapi;'
 
-    - name: Install Python dependencies
-      run: make install-python-testing
+#    - name: Install Python dependencies
+#      run: make install-python-testing
 
     - name: Create the test configuration
       run: |
