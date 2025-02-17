@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       #image: rockylinux/rockylinux:9
-      image: debian/debian:12
+      image: debian:12
     steps:
     - uses: actions/checkout@v1
     - name: Are we really on debian Linux?
