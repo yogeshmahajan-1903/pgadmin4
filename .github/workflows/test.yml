@@ -12,6 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Are we really on debian Linux?
+      shell: bash
       run: |
         lsb_release -a
         cat /etc/os-release
