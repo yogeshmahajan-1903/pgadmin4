@@ -26,12 +26,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pre
+        run: |
+          sudo apt update
+          apt-get install curl -y
+          sudo apt-get install xdotool -y
+          sudo apt install apt-show-versions -y
       - name: Pull up the scripts
         run: |
           sudo Xvfb -ac :99 -screen 0 1440x900x24 > /dev/null 2>&1 &
           export DISPLAY=:99
           curl -OO https://raw.githubusercontent.com/yogeshmahajan-1903/pgAdmin4-Deployment-Scripts/main/{pgAdmin_installer_automation_Apt.sh,prerequisite_Apt.sh}
-          bash ./prerequisite_Apt.sh
+  #bash ./prerequisite_Apt.sh
           sudo bash ./pgAdmin_installer_automation_Apt.sh -o install
 
       - name: Archive screenshots
