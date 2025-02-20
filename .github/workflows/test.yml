@@ -28,7 +28,7 @@ jobs:
 
       - name: Pull up the scripts
         run: |
-          apt-get install curl -y
+          sudo apt-get install curl -y
           sudo apt-get install xdotool -y
           sudo apt install apt-show-versions -y
           sudo Xvfb -ac :99 -screen 0 1440x900x24 > /dev/null 2>&1 &
