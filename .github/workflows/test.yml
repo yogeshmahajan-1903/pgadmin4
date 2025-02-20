@@ -35,6 +35,7 @@ jobs:
           export DISPLAY=:99
           curl -OO https://raw.githubusercontent.com/yogeshmahajan-1903/pgAdmin4-Deployment-Scripts/main/{pgAdmin_installer_automation_Apt.sh,prerequisite_Apt.sh}
           sudo bash ./pgAdmin_installer_automation_Apt.sh -o install
+          sudo bash ./pgAdmin_installer_automation_Apt.sh -o  verify
 
       - name: Archive screenshots
         if: success() || failure()
