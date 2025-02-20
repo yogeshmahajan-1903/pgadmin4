@@ -26,6 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+
       - name: Pull up the scripts
         run: |
           sudo apt-get install curl -y
