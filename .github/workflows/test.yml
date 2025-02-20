@@ -1,6 +1,7 @@
 name: Tests on Installer script
 
 
+
 on: [push, pull_request]
 #  push:
 #    branches: [ "master" ]
