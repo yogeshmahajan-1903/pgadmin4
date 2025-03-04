@@ -7,7 +7,7 @@
 //
 //////////////////////////////////////////////////////////////
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { Box, styled, useTheme } from '@mui/material';
 import url_for from 'sources/url_for';
 import PropTypes from 'prop-types';
@@ -20,6 +20,7 @@ import { io } from 'socketio';
 import { copyToClipboard } from '../../../../../static/js/clipboard';
 import 'pgadmin.browser.keyboard';
 import gettext from 'sources/gettext';
+import getApiInstance from '../../../../../static/js/api_instance';
 
 
 const Root = styled(Box)(()=>({
@@ -142,6 +143,30 @@ export default function  PsqlComponent({ params, pgAdmin }) {
   const termRef = React.useRef(null);
   const containerRef = React.useRef(null);
 
+  const debounceTimeout = useRef(null); 
+  const debouncedInputHandler = useCallback((term_data, params) => {
+    console.log(params);
+    // Clear the previous timeout, if any
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    // Set a new timeout to handle debounced input
+    debounceTimeout.current = setTimeout(() => {
+      console.log(term_data); // Set the latest input data to state
+      let data = {
+        'tool_name': 'psql',
+        'trans_id': params.trans_id,
+        'tool_data': term_data,
+        'connection_info':params
+      }
+          getApiInstance().post(
+                    url_for('settings.save_pgadmin_state'),
+                    JSON.stringify(data),
+                  ).catch((error)=>{console.error(error);});
+    }, 500);
+  }, []);
+
   const initializePsqlTool = (params)=>{
     const term = new Terminal({
       cursorBlink: true,
@@ -159,6 +184,13 @@ export default function  PsqlComponent({ params, pgAdmin }) {
 
     psql_terminal_io(term, socket, params.platform, pgAdmin);
 
+    // Event listener to capture input data
+    let completeData = '';
+    term.onData((data) => {
+          completeData += data;
+          debouncedInputHandler(completeData, params);
+    });
+    
     /*  Set terminal size */
     setTimeout(function(){
       socket.emit('resize', {'cols': term.cols, 'rows': term.rows});

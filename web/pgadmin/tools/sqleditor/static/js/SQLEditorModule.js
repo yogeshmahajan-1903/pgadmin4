@@ -213,7 +213,7 @@ export default class SQLEditor {
     let browser_preferences = usePreferences.getState().getPreferencesForModule('browser');
     let open_new_tab = browser_preferences.new_browser_tab_open;
     const [icon, tooltip] = panelTitleFunc.getQueryToolIcon(panel_title, is_query_tool);
-    let selectedNodeInfo = pgAdmin.Browser.tree.getTreeNodeHierarchy(
+    let selectedNodeInfo = pgAdmin.Browser.tree?.getTreeNodeHierarchy(
       pgAdmin.Browser.tree.selected()
     );
 

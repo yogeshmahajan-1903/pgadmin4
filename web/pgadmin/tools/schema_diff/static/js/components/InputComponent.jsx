@@ -15,6 +15,7 @@ import { Box, Grid, Typography } from '@mui/material';
 import { InputSelect } from '../../../../../static/js/components/FormComponents';
 import { SchemaDiffEventsContext } from './SchemaDiffComponent';
 import { SCHEMA_DIFF_EVENT } from '../SchemaDiffConstants';
+import { usePgAdmin } from '../../../../../static/js/PgAdminProvider';
 
 
 export function InputComponent({ label, serverList, databaseList, schemaList, diff_type, selectedSid = null, selectedDid=null, selectedScid=null, onServerSchemaChange }) {
@@ -24,6 +25,7 @@ export function InputComponent({ label, serverList, databaseList, schemaList, di
   const eventBus = useContext(SchemaDiffEventsContext);
   const [disableDBSelection, setDisableDBSelection] = useState(selectedSid == null);
   const [disableSchemaSelection, setDisableSchemaSelection] = useState(selectedDid == null);
+  const pgAdmin = usePgAdmin();
 
   useEffect(() => {
     setSelectedDatabase(selectedDid);
@@ -41,6 +43,7 @@ export function InputComponent({ label, serverList, databaseList, schemaList, di
       setDisableSchemaSelection(true);
     }
     eventBus.fireEvent(SCHEMA_DIFF_EVENT.TRIGGER_SELECT_SERVER, { selectedOption, diff_type, serverList });
+    pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { selectedOption, diff_type, serverList });
   };
 
   const changeDatabase = (selectedDB) => {
@@ -52,12 +55,14 @@ export function InputComponent({ label, serverList, databaseList, schemaList, di
       setDisableSchemaSelection(true);
     }
     eventBus.fireEvent(SCHEMA_DIFF_EVENT.TRIGGER_SELECT_DATABASE, {selectedServer, selectedDB, diff_type, databaseList});
+    pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { selectedServer, selectedDB, diff_type, databaseList });
     onServerSchemaChange();
   };
 
   const changeSchema = (selectedSC) => {
     setSelectedSchema(selectedSC);
     eventBus.fireEvent(SCHEMA_DIFF_EVENT.TRIGGER_SELECT_SCHEMA, { selectedSC, diff_type });
+    pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { selectedSC, diff_type });
     onServerSchemaChange();
   };
 

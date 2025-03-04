@@ -15,6 +15,11 @@ import { send_heartbeat, stop_heartbeat } from './heartbeat';
 import getApiInstance from '../../../static/js/api_instance';
 import usePreferences, { setupPreferenceBroadcast } from '../../../preferences/static/js/store';
 import checkNodeVisibility from '../../../static/js/check_node_visibility';
+import { getTitle } from '../../../tools/sqleditor/static/js/sqleditor_title';
+import * as showQueryTool from '../../../tools/sqleditor/static/js/show_query_tool';
+import * as commonUtils from 'sources/utils';
+import pgWindow from 'sources/window';
+
 
 define('pgadmin.browser', [
   'sources/gettext', 'sources/url_for', 'sources/pgadmin',
@@ -206,6 +211,8 @@ define('pgadmin.browser', [
     uiloaded: function() {
       this.set_master_password('');
       this.check_version_update();
+      console.log('done with master password');
+      //this.open_previous_query_tool_tabs();
     },
     check_corrupted_db_file: function() {
       getApiInstance().get(
@@ -290,6 +297,71 @@ define('pgadmin.browser', [
         // Suppress any errors
       });
     },
+
+    open_previous_query_tool_tabs: function () {
+      console.log('In open_previous_query_tool_tabs');
+      getApiInstance().get(
+        url_for('sqleditor.get_query_tool_data')
+      ).then((res)=> {
+        console.log('received sqleditor.get_query_tool_data')
+        console.log(res);
+        const prefStore = usePreferences.getState();
+        let browserPref = prefStore.getPreferencesForModule('browser');
+        if(res.data.success && res.data.data.length > 0){
+          // Open query tools
+          let oldTransId = []
+          _.each(res.data.data, function(qt_info){
+            let connection_info = qt_info.connection_info,
+              query_data = qt_info.query_data;
+            let parentData = {
+              server_group: {
+                _id: connection_info.sgid || 0,
+              },
+              server: {
+                _id: connection_info.sid,
+              },
+              database: {
+                _id: connection_info.did,
+                label: connection_info.database_name,
+                _label: connection_info.database_name,
+              },
+            };
+
+            const transId = commonUtils.getRandomInt(1, 9999999);
+            const qtUrl = showQueryTool.generateUrl(transId, parentData, null);
+            let sqlId = `old_qt_data${transId}`;
+            const title = getTitle(pgAdmin, browserPref, parentData, false, connection_info.server_name, connection_info.database_name, connection_info.role || connection_info.user);
+            showQueryTool.launchQueryTool(pgWindow.pgAdmin.Tools.SQLEditor, transId, qtUrl, title, {
+                user: connection_info.user,
+                role: connection_info.role,
+                sql_id: sqlId
+              });
+
+            localStorage.setItem(sqlId, query_data);
+            oldTransId.push(qt_info.old_trans_id)
+          })
+
+          // call clear query data for which query tool has been launched.
+          try {
+            getApiInstance().delete(url_for('sqleditor.delete_query_tool_data'), {
+              data: {
+                'oldTransId': oldTransId
+              }
+            });
+          } catch (error) {
+            console.error(error);
+            pgAdmin.Browser.notifier.error(gettext('Failed to remove query data.') + parseApiError(error));
+          }
+
+
+        }
+
+      }).catch(function(error) {
+        pgAdmin.Browser.notifier.pgRespErrorNotify(error);
+      });
+      
+    },
+
 
     bind_beforeunload: function() {
       window.addEventListener('beforeunload', function(e) {
