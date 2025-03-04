@@ -329,14 +329,16 @@ define('pgadmin.browser', [
 
             const transId = commonUtils.getRandomInt(1, 9999999);
             const qtUrl = showQueryTool.generateUrl(transId, parentData, null);
-
+            let sqlId = `old_qt_data${transId}`;
             const title = getTitle(pgAdmin, browserPref, parentData, false, connection_info.server_name, connection_info.database_name, connection_info.role || connection_info.user);
             showQueryTool.launchQueryTool(pgWindow.pgAdmin.Tools.SQLEditor, transId, qtUrl, title, {
                 user: connection_info.user,
                 role: connection_info.role,
-                query_data: query_data
+                sql_id: sqlId
               });
-              oldTransId.push(qt_info.old_trans_id)
+
+            localStorage.setItem(sqlId, query_data);
+            oldTransId.push(qt_info.old_trans_id)
           })
 
           // call clear query data for which query tool has been launched.
