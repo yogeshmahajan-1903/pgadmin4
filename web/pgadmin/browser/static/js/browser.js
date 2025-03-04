@@ -206,6 +206,8 @@ define('pgadmin.browser', [
     uiloaded: function() {
       this.set_master_password('');
       this.check_version_update();
+      console.log('done with master password');
+      this.open_previous_query_tool_tabs();
     },
     check_corrupted_db_file: function() {
       getApiInstance().get(
@@ -290,6 +292,67 @@ define('pgadmin.browser', [
         // Suppress any errors
       });
     },
+
+    open_previous_query_tool_tabs: function () {
+      console.log('In open_previous_query_tool_tabs');
+      getApiInstance().get(
+        url_for('sqleditor.get_query_tool_data')
+      ).then((res)=> {
+        console.log('received sqleditor.get_query_tool_data')
+        console.log(res);
+        //const data = res.data.data.result;
+
+
+            // const transId = commonUtils.getRandomInt(1, 9999999);
+            // let selectedConn = _.find(qtState.connection_list, (c)=>c.is_selected);
+            // let parentData = {
+            //   server_group: {
+            //     _id: selectedConn.sgid || 0,
+            //   },
+            //   server: {
+            //     _id: selectedConn.sid,
+            //     server_type: qtState.params.server_type,
+            //   },
+            //   database: {
+            //     _id: selectedConn.did,
+            //     label: selectedConn.database_name,
+            //     _label: selectedConn.database_name,
+            //   },
+            // };
+        
+            // const gridUrl = showQueryTool.generateUrl(transId, parentData, null);
+            // const title = getTitle(pgAdmin, qtState.preferences.browser, null, false, selectedConn.server_name, selectedConn.database_name, selectedConn.role || selectedConn.user);
+            // showQueryTool.launchQueryTool(pgWindow.pgAdmin.Tools.SQLEditor, transId, gridUrl, title, {
+            //   user: selectedConn.user,
+            //   role: selectedConn.role,
+            //   fileName: fileName,
+            //   storage: storage
+            // });
+
+      }).catch(function(error) {
+        pgAdmin.Browser.notifier.pgRespErrorNotify(error);
+      });
+      
+    },
+
+    openQueryTool: function ({ sgid, sid, stype, did, database, user }) {
+
+      // const queryToolTitle = `${database}/${user}@${server}`;
+      // const transId = getRandomInt(1, 9999999);
+    
+      // let url_endpoint = url_for('sqleditor.panel', {
+      //   'trans_id': transId,
+      // });
+    
+      // url_endpoint += `?is_query_tool=${true}`
+      //   +`&sgid=${sgid}`
+      //   +`&sid=${sid}`
+      //   +`&server_type=${stype}`
+      //   +`&did=${did}`
+      //   +`&database_name=${database}`;
+    
+      // launchQueryTool(queryToolMod, transId, url_endpoint, queryToolTitle, '');
+      },
 
     bind_beforeunload: function() {
       window.addEventListener('beforeunload', function(e) {

@@ -55,6 +55,7 @@ from pgadmin.tools.sqleditor.utils.query_tool_fs_utils import \
     read_file_generator
 from pgadmin.tools.sqleditor.utils.filter_dialog import FilterDialog
 from pgadmin.tools.sqleditor.utils.query_history import QueryHistory
+from pgadmin.tools.sqleditor.utils.save_query_tool_data import SaveQueryToolData
 from pgadmin.tools.sqleditor.utils.macros import get_macros, \
     get_user_macros, set_macros
 from pgadmin.utils.constants import MIMETYPE_APP_JS, \
@@ -147,6 +148,8 @@ class SqlEditorModule(PgAdminModule):
             'sqleditor._check_server_connection_status',
             'sqleditor.get_new_connection_role',
             'sqleditor.connect_server',
+            'sqleditor.save_query_tool_data',
+            'sqleditor.get_query_tool_data'
         ]
 
     def on_logout(self):
@@ -656,6 +659,10 @@ def close(trans_id):
             # session variable.
             grid_data.pop(str(trans_id), None)
             session['gridData'] = grid_data
+            # delete query tool saved data
+            print('From close query tool call')
+            SaveQueryToolData.clear_query_tool_data(current_user.id, trans_id)
+
         except Exception as e:
             current_app.logger.error(e)
             return internal_server_error(errormsg=str(e))
@@ -2778,3 +2785,41 @@ def user_macros(json_resp=True):
     This method is used to fetch all user macros.
     """
     return get_user_macros()
+
+
+@blueprint.route(
+    '/save_query_tool_data/<int:trans_id>',
+    methods=["POST"], endpoint='save_query_tool_data'
+)
+@pga_login_required
+def save_query_tool_data(trans_id):
+    """
+    This method adds to query history for user/server/database
+
+    Args:
+        sid: server id
+        did: database id
+    """
+
+    _, _, conn, trans_obj, _ = check_transaction_status(trans_id)
+
+    if not trans_obj:
+        return make_json_response(
+            data={
+                'status': False,
+            }
+        )
+    print('In save_query_tool_data')
+    print(conn.manager.server_type)
+    print(trans_obj.sgid)
+    return SaveQueryToolData.save(current_user.id, trans_obj.sid, conn.db,
+                                  trans_id,  request=request)
+
+
+@blueprint.route(
+    '/get_query_tool_data',
+    methods=["GET"], endpoint='get_query_tool_data'
+)
+@pga_login_required
+def get_query_tool_data():
+    return SaveQueryToolData.get(current_user.id)

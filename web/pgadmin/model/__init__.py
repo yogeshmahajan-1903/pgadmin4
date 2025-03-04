@@ -33,7 +33,7 @@ import config
 #
 ##########################################################################
 
-SCHEMA_VERSION = 42
+SCHEMA_VERSION = 43
 
 ##########################################################################
 #
@@ -344,6 +344,18 @@ class QueryHistoryModel(db.Model):
     dbname = db.Column(db.String(), nullable=False, primary_key=True)
     query_info = db.Column(PgAdminDbBinaryString(), nullable=False)
     last_updated_flag = db.Column(db.String(), nullable=False)
+
+
+class QueryToolDataModel(db.Model):
+    """Define the history SQL table."""
+    __tablename__ = 'query_tool_data'
+    trans_id = db.Column(db.Integer(), nullable=False, primary_key=True)
+    uid = db.Column(
+        db.Integer, db.ForeignKey(USER_ID), nullable=False, primary_key=True )
+    connection_info = db.Column(
+        MutableDict.as_mutable(types.JSON), nullable=False)
+    query_data = db.Column(PgAdminDbBinaryString(), nullable=True)
+
 
 
 class Database(db.Model):
