@@ -216,6 +216,10 @@ export default function QueryToolComponent({params, pgWindow, pgAdmin, selectedN
   const api = useMemo(()=>getApiInstance(), []);
   const modal = useModal();
 
+  /* Save Query tool data interval */
+  let saveQueryToolDataTime = qtState.preferences.sqleditor.save_query_tool_data_interval > 0
+    && !qtState.obtaining_conn && qtState.connected_once && qtState.preferences?.sqleditor?.connection_status ?
+    qtState.preferences.sqleditor.save_query_tool_data_interval*1000 : -1;
   /* Connection status poller */
   let pollTime = qtState.preferences.sqleditor.connection_status_fetch_time > 0
     && !qtState.obtaining_conn && qtState.connected_once && qtState.preferences?.sqleditor?.connection_status ?
@@ -899,6 +903,7 @@ export default function QueryToolComponent({params, pgWindow, pgAdmin, selectedN
     mainContainerRef: containerRef,
     editor_disabled: qtState.editor_disabled,
     eol: qtState.eol,
+    connection_list: qtState.connection_list,
     toggleQueryTool: () => setQtStatePartial((prev)=>{
       return {
         ...prev,
