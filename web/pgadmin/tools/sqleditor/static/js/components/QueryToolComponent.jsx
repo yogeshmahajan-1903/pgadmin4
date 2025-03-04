@@ -173,6 +173,7 @@ export default function QueryToolComponent({params, pgWindow, pgAdmin, selectedN
     },
     is_new_tab: window.location == window.parent?.location,
     is_visible: true,
+    is_force_close: false,
     current_file: null,
     obtaining_conn: true,
     connected: false,
@@ -446,6 +447,7 @@ export default function QueryToolComponent({params, pgWindow, pgAdmin, selectedN
     });
 
     eventBus.current.registerListener(QUERY_TOOL_EVENTS.FORCE_CLOSE_PANEL, ()=>{
+      setQtStatePartial({is_force_close: true});
       forceClose();
     });
 
@@ -504,6 +506,7 @@ export default function QueryToolComponent({params, pgWindow, pgAdmin, selectedN
         }), {
           keepalive: true,
           method: 'DELETE',
+          body: JSON.stringify({ 'query_tool_force_close': qtState.is_force_close })
         }
       )
         .then(()=>{/* Success */})
