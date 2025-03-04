@@ -21,7 +21,7 @@ from pgadmin.utils.ajax import make_json_response, bad_request,\
     success_return, internal_server_error
 from pgadmin.utils.menu import MenuItem
 
-from pgadmin.model import db, Setting
+from pgadmin.model import db, Setting, PgadminStateDataModel
 from pgadmin.utils.constants import MIMETYPE_APP_JS
 from .utils import get_dialog_type, get_file_type_setting
 
@@ -52,7 +52,8 @@ class SettingsModule(PgAdminModule):
             'settings.save_tree_state', 'settings.get_tree_state',
             'settings.reset_tree_state',
             'settings.save_file_format_setting',
-            'settings.get_file_format_setting'
+            'settings.get_file_format_setting',
+            'settings.save_pgadmin_state'
         ]
 
 
@@ -256,3 +257,69 @@ def get_file_format_setting():
 
     return make_json_response(success=True,
                               info=get_file_type_setting(list(data.values())))
+
+
+@blueprint.route(
+    '/save_pgadmin_state',
+    methods=["POST"], endpoint='save_pgadmin_state'
+)
+@pga_login_required
+def save_pgadmin_state_data():
+    """
+    Args:
+        sid: server id
+        did: database id
+    """
+    data = json.loads(request.data)['data']
+    print(data)
+    id = data['trans_id']
+    tool_data = json.dumps(data['tool_data'])
+    print(tool_data)
+    try:
+        data_entry = PgadminStateDataModel(uid=current_user.id, id=id,
+                                             connection_info=data['connection_info'],
+                                           tool_name=data['tool_name'],
+                                        tool_data=tool_data)
+
+        db.session.merge(data_entry)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+        # do not affect query execution if history saving fails
+
+    return make_json_response(
+        data={
+            'status': True,
+            'msg': 'Success',
+        }
+    )
+
+
+@blueprint.route(
+    '/get_pgadmin_state',
+    methods=["GET"], endpoint='get_pgadmin_state'
+)
+@pga_login_required
+def get_query_tool_data():
+    pass
+    #return get_get_pgadmin_state(current_user.id)
+
+
+@blueprint.route(
+    '/delete_pgadmin_state/',
+    methods=["DELETE"], endpoint='delete_query_tool_data')
+@pga_login_required
+def delete_query_tool_data():
+    pass
+    # req_data = json.loads(request.data)
+    # print('In delete_query_tool_data')
+    # for old_trans_id in req_data['oldTransId']:
+    #     SaveQueryToolData.clear_query_tool_data(current_user.id, old_trans_id)
+    #
+    # return make_json_response(
+    #     data={
+    #         'status': True,
+    #         'msg': 'Success',
+    #     }
+    # )

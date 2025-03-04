@@ -146,7 +146,7 @@ class SqlEditorModule(PgAdminModule):
             'sqleditor.get_new_connection_user',
             'sqleditor._check_server_connection_status',
             'sqleditor.get_new_connection_role',
-            'sqleditor.connect_server',
+            'sqleditor.connect_server'
         ]
 
     def on_logout(self):
@@ -656,6 +656,12 @@ def close(trans_id):
             # session variable.
             grid_data.pop(str(trans_id), None)
             session['gridData'] = grid_data
+            # delete query tool saved data
+            print('From close query tool call')
+            print(json.loads(request.data)['query_tool_force_close'])
+            # if json.loads(request.data)['query_tool_force_close']:
+            #     SaveQueryToolData.clear_query_tool_data(current_user.id, trans_id)
+
         except Exception as e:
             current_app.logger.error(e)
             return internal_server_error(errormsg=str(e))

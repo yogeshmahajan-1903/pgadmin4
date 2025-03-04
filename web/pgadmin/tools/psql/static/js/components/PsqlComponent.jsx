@@ -7,7 +7,7 @@
 //
 //////////////////////////////////////////////////////////////
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { Box, styled, useTheme } from '@mui/material';
 import url_for from 'sources/url_for';
 import PropTypes from 'prop-types';
@@ -159,6 +159,27 @@ export default function  PsqlComponent({ params, pgAdmin }) {
 
     psql_terminal_io(term, socket, params.platform, pgAdmin);
 
+    const debounceTimeout = useRef(null); 
+    const debouncedInputHandler = useCallback((data) => {
+      // Clear the previous timeout, if any
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+  
+      // Set a new timeout to handle debounced input
+      debounceTimeout.current = setTimeout(() => {
+        console.log(data); // Set the latest input data to state
+        // You can perform additional actions like saving or API calls here
+      }, 500);
+    }, []);
+
+    // Event listener to capture input data
+    let completeData = '';
+    term.onData((data) => {
+          completeData += data;
+          debouncedInputHandler(completeData);
+    });
+    
     /*  Set terminal size */
     setTimeout(function(){
       socket.emit('resize', {'cols': term.cols, 'rows': term.rows});
