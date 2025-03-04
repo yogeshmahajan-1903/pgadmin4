@@ -6,27 +6,21 @@ import json
 
 class SaveQueryToolData:
     @staticmethod
-    def get(uid):
+    def get_saved_query_tool_data(uid):
         res = []
         result = (db.session \
             .query(QueryToolDataModel.uid,
+                   QueryToolDataModel.trans_id,
                    QueryToolDataModel.connection_info,
                   QueryToolDataModel.query_data)
             .filter(QueryToolDataModel.uid == uid))
         for rec in list(result):
                 res.append({
-                    'uid': rec.connection_info,
+                    'old_trans_id': rec.trans_id,
+                    'connection_info': rec.connection_info,
                     'query_data': rec.query_data
                 })
-
-        print(res)
-        return make_json_response(
-            data={
-                'status': True,
-                'msg': '',
-                'result': res
-            }
-        )
+        return make_json_response(success=1,  errormsg='', data=res)
 
     # @staticmethod
     # def update_query_tool_data(uid, sid, dbname, trans_id, request):
@@ -34,58 +28,10 @@ class SaveQueryToolData:
 
 
     @staticmethod
-    def save(uid, sid, dbname, trans_id, request):
-        SaveQueryToolData.get(uid)
+    def save(uid, trans_id, connection_info, query_data ):
         try:
-            # max_srno = db.session \
-            #     .query(db.func.max(QueryToolDataModel.srno)) \
-            #     .filter(QueryToolDataModel.uid == uid,
-            #             QueryToolDataModel.sid == sid,
-            #             QueryToolDataModel.dbname == dbname,
-            #             QueryToolDataModel.trans_id == trans_id) \
-            #     .scalar()
-            #
-            # # if no records present
-            # if max_srno is None:
-            #     new_srno = 1
-            # else:
-            #     new_srno = max_srno + 1
-            #
-            #     # last updated flag is used to recognise the last
-            #     # inserted/updated record.
-            #     # It is helpful to cycle the records
-            #     last_updated_rec = db.session.query(QueryToolDataModel) \
-            #         .filter(QueryToolDataModel.uid == uid,
-            #                 QueryToolDataModel.sid == sid,
-            #                 QueryToolDataModel.dbname == dbname,
-            #                 QueryToolDataModel.trans_id == trans_id,
-            #                 QueryToolDataModel.last_updated_flag == 'Y') \
-            #         .first()
-            #
-            #     # there should be a last updated record
-            #     # if not present start from sr no 1
-            #     if last_updated_rec is not None:
-            #         last_updated_rec.last_updated_flag = 'N'
-            #
-            #         # # if max limit reached then recycle
-            #         # if new_srno > MAX_QUERY_HIST_STORED:
-            #         #     new_srno = (last_updated_rec.srno % MAX_QUERY_HIST_STORED) + 1
-            #     else:
-            #         new_srno = 1
-            #
-            #     # if the limit is lowered and number of records present is
-            #     # more, then cleanup
-            #     if max_srno > MAX_QUERY_HIST_STORED:
-            #         db.session.query(QueryToolDataModel) \
-            #             .filter(QueryToolDataModel.uid == uid,
-            #                     QueryToolDataModel.sid == sid,
-            #                     QueryToolDataModel.dbname == dbname,
-            #                     QueryToolDataModel.srno >
-            #                     MAX_QUERY_HIST_STORED) \
-            #             .delete()
-
             data_entry = QueryToolDataModel(trans_id=trans_id, uid=uid,
-                query_data=request.data.query_data, connection_info=request.data.query_data.connections_list)
+                connection_info=connection_info, query_data=query_data)
 
             db.session.merge(data_entry)
             db.session.commit()
@@ -102,7 +48,7 @@ class SaveQueryToolData:
         )
 
     @staticmethod
-    def clear_query_tool_data(uid, trans_id, sid=None, dbname=None, filter=None):
+    def clear_query_tool_data(uid, trans_id):
         try:
             filters = [
                 QueryToolDataModel.uid == uid,
@@ -111,9 +57,9 @@ class SaveQueryToolData:
 
             history = db.session.query(QueryToolDataModel) \
                 .filter(*filters)
-            for row in history:
-                query_info = json.loads(row.query_data.decode())
-                print(query_info)
+            # for row in history:
+            #     query_info = json.loads(row.query_data.decode())
+            #     print(query_info)
             history.delete()
             # for row in history:
             #     query_info = json.loads(row.query_data.decode())

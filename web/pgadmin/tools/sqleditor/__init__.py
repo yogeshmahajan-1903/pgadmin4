@@ -149,7 +149,8 @@ class SqlEditorModule(PgAdminModule):
             'sqleditor.get_new_connection_role',
             'sqleditor.connect_server',
             'sqleditor.save_query_tool_data',
-            'sqleditor.get_query_tool_data'
+            'sqleditor.get_query_tool_data',
+            'sqleditor.delete_query_tool_data'
         ]
 
     def on_logout(self):
@@ -661,7 +662,9 @@ def close(trans_id):
             session['gridData'] = grid_data
             # delete query tool saved data
             print('From close query tool call')
-            SaveQueryToolData.clear_query_tool_data(current_user.id, trans_id)
+            print(json.loads(request.data)['query_tool_force_close'])
+            if json.loads(request.data)['query_tool_force_close']:
+                SaveQueryToolData.clear_query_tool_data(current_user.id, trans_id)
 
         except Exception as e:
             current_app.logger.error(e)
@@ -2809,11 +2812,10 @@ def save_query_tool_data(trans_id):
                 'status': False,
             }
         )
-    print('In save_query_tool_data')
-    print(conn.manager.server_type)
-    print(trans_obj.sgid)
-    return SaveQueryToolData.save(current_user.id, trans_obj.sid, conn.db,
-                                  trans_id,  request=request)
+    req_data = json.loads(request.data)
+    return SaveQueryToolData.save(uid=current_user.id, trans_id=trans_id,
+                                   connection_info=req_data['connection_info'],
+                                  query_data=req_data['query_data'])
 
 
 @blueprint.route(
@@ -2822,4 +2824,22 @@ def save_query_tool_data(trans_id):
 )
 @pga_login_required
 def get_query_tool_data():
-    return SaveQueryToolData.get(current_user.id)
+    return SaveQueryToolData.get_saved_query_tool_data(current_user.id)
+
+
+@blueprint.route(
+    '/delete_query_tool_data/',
+    methods=["DELETE"], endpoint='delete_query_tool_data')
+@pga_login_required
+def delete_query_tool_data():
+    req_data = json.loads(request.data)
+    print('In delete_query_tool_data')
+    for old_trans_id in req_data['oldTransId']:
+        SaveQueryToolData.clear_query_tool_data(current_user.id, old_trans_id)
+
+    return make_json_response(
+        data={
+            'status': True,
+            'msg': 'Success',
+        }
+    )

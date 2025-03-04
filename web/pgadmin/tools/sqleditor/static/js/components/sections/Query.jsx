@@ -337,13 +337,14 @@ export default function Query({onTextSelect, setQtStatePartial}) {
     console.log(editor.current.getValue());
     let data = {
       'query_data': editor.current.getValue(),
-      'connections_list': queryToolCtx.connections_list
+      'connection_info': _.find(queryToolCtx.connection_list, c => c.is_selected)
     }
+    console.log(data);
     queryToolCtx.api.post(
           url_for('sqleditor.save_query_tool_data', {
             'trans_id': queryToolCtx.params.trans_id,
           }),
-          JSON.stringify(editor.current.getValue()),
+          JSON.stringify(data),
         ).catch((error)=>{console.error(error);});
   }, saveQueryToolDataTime);
 
