@@ -29,8 +29,8 @@ jobs:
             echo existing_pg_version=$( pg_config --version | cut -d ' ' -f 2 | cut -d '.' -f 1 )
             echo "Existing PostgreSQL version: $existing_pg_version"
           
-            sudo pg_dropcluster ${{ existing_pg_version }} main --stop
-            sudo apt-get -y remove postgresql-${{ existing_pg_version }})
+            sudo pg_dropcluster $existing_pg_version main --stop
+            sudo apt-get -y remove "postgresql-${existing_pg_version}"
           fi
       - name: Install platform dependencies on Linux
         if: ${{ matrix.os == 'ubuntu-22.04' }}
