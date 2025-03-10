@@ -31,6 +31,7 @@ jobs:
             if [ $installed_pg_version != ${{ matrix.pgver }} ]; then
               sudo pg_dropcluster $installed_pg_version main --stop
               sudo apt-get -y remove "postgresql-${installed_pg_version}"
+            fi
           fi
       - name: Install platform dependencies on Linux
         if: ${{ matrix.os == 'ubuntu-22.04' }}
