@@ -28,9 +28,9 @@ jobs:
             # Extract the major version from pg_config
             installed_pg_version=$( pg_config --version | cut -d ' ' -f 2 | cut -d '.' -f 1 )
             echo "Installed PostgreSQL version: installed_pg_version"
-          
-            sudo pg_dropcluster $installed_pg_version main --stop
-            sudo apt-get -y remove "postgresql-${installed_pg_version}"
+            if [ $installed_pg_version != ${{ matrix.pgver }} ]; then
+              sudo pg_dropcluster $installed_pg_version main --stop
+              sudo apt-get -y remove "postgresql-${installed_pg_version}"
           fi
       - name: Install platform dependencies on Linux
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -43,7 +43,11 @@ jobs:
         run: |
           sudo ls -la /etc/postgresql/
           sudo ls -la /etc/postgresql/${{ matrix.pgver }}/main/
+          sudo su -c "echo local all all trust > /etc/postgresql/${{ matrix.pgver }}/main/pg_hba.conf"
+          sudo sed -i "s/port = 543[0-9]/port = 59${{ matrix.pgver }}/g" /etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf
+          sudo sed -i "s/#shared_preload_libraries = ''/shared_preload_libraries = '\$libdir\/plugin_debugger'/g" /etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf
           sudo su - postgres -c "/usr/lib/postgresql/${{ matrix.pgver }}/bin/postgres -D /var/lib/postgresql/${{ matrix.pgver }}/main -c config_file=/etc/postgresql/${{ matrix.pgver }}/main/postgresql.conf &"
+
 
           until sudo runuser -l postgres -c "pg_isready -p 59${{ matrix.pgver }}" 2>/dev/null; do
             >&2 echo "Postgres is unavailable - sleeping for 2 seconds"
