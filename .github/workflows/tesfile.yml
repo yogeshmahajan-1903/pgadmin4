@@ -24,8 +24,10 @@ jobs:
       - name: Uninstall PostgreSQL if already present
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         run: | 
-          sudo pg_dropcluster 14 main --stop
-          sudo apt-get remove postgresql-14
+          if exist "$(ls /etc/postgresql/*/*/postgresql.conf 2>/dev/null)"(
+          existing_pg_version: ${{ pg_config --version | cut -d ' ' -f 2 | cut -d '.' -f 1}}
+          sudo pg_dropcluster ${{ existing_pg_version }} main --stop
+          sudo apt-get remove postgresql-${{ existing_pg_version }})
 
       - name: Install platform dependencies on Linux
         if: ${{ matrix.os == 'ubuntu-22.04' }}
