@@ -104,6 +104,7 @@ def panel(trans_id):
     data = _get_database_role(params['sid'], params['did'])
 
     params = {
+        'trans_id': trans_id,
         'sid': params['sid'],
         'db': underscore_escape(data['db_name']),
         'server_type': params['server_type'],

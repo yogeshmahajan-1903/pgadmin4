@@ -443,7 +443,7 @@ export default function Query({onTextSelect, setQtStatePartial}) {
           'tool_data': editor.current.getValue(),
           'connection_info': _.find(queryToolCtx.connection_list, c => c.is_selected)
         }
-        pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', {data});
+        pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', data);
       }, 500)};
       debouncedSave();
 

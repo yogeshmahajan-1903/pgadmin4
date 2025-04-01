@@ -683,7 +683,7 @@ export function SchemaDiffCompare({ params }) {
     }
     return opt;
   }
-
+  console.log(params);
   return (
     <>
       <Loader message={loaderText} style={{fontWeight: 900}}></Loader>

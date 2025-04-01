@@ -270,7 +270,7 @@ def save_pgadmin_state_data():
         sid: server id
         did: database id
     """
-    data = json.loads(request.data)['data']
+    data = json.loads(request.data)
     print(data)
     id = data['trans_id']
     tool_data = json.dumps(data['tool_data'])
