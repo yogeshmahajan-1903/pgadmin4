@@ -15,11 +15,10 @@ import { send_heartbeat, stop_heartbeat } from './heartbeat';
 import getApiInstance from '../../../static/js/api_instance';
 import usePreferences, { setupPreferenceBroadcast } from '../../../preferences/static/js/store';
 import checkNodeVisibility from '../../../static/js/check_node_visibility';
-import { getTitle } from '../../../tools/sqleditor/static/js/sqleditor_title';
 import * as showQueryTool from '../../../tools/sqleditor/static/js/show_query_tool';
-import * as commonUtils from 'sources/utils';
-import pgWindow from 'sources/window';
-
+import {relaunchPsqlTool} from '../../../tools/psql/static/js/show_psql_tool';
+import {relaunchErdTool} from '../../../tools/erd/static/js/show_erd_tool'
+import { relaunchSchemaDiff } from '../../../tools/schema_diff/static/js/showSchemaDiffTool';
 
 define('pgadmin.browser', [
   'sources/gettext', 'sources/url_for', 'sources/pgadmin',
@@ -212,7 +211,7 @@ define('pgadmin.browser', [
       this.set_master_password('');
       this.check_version_update();
       console.log('done with master password');
-      //this.open_previous_query_tool_tabs();
+      this.restore_pgadmin_state();
     },
     check_corrupted_db_file: function() {
       getApiInstance().get(
@@ -298,63 +297,89 @@ define('pgadmin.browser', [
       });
     },
 
-    open_previous_query_tool_tabs: function () {
-      console.log('In open_previous_query_tool_tabs');
+    restore_pgadmin_state: function () {
+      console.log('In restore_pgadmin_state');
       getApiInstance().get(
-        url_for('sqleditor.get_query_tool_data')
+        url_for('settings.get_pgadmin_state')
       ).then((res)=> {
-        console.log('received sqleditor.get_query_tool_data')
         console.log(res);
-        const prefStore = usePreferences.getState();
-        let browserPref = prefStore.getPreferencesForModule('browser');
-        if(res.data.success && res.data.data.length > 0){
-          // Open query tools
-          let oldTransId = []
-          _.each(res.data.data, function(qt_info){
-            let connection_info = qt_info.connection_info,
-              query_data = qt_info.query_data;
-            let parentData = {
-              server_group: {
-                _id: connection_info.sgid || 0,
-              },
-              server: {
-                _id: connection_info.sid,
-              },
-              database: {
-                _id: connection_info.did,
-                label: connection_info.database_name,
-                _label: connection_info.database_name,
-              },
-            };
-
-            const transId = commonUtils.getRandomInt(1, 9999999);
-            const qtUrl = showQueryTool.generateUrl(transId, parentData, null);
-            let sqlId = `old_qt_data${transId}`;
-            const title = getTitle(pgAdmin, browserPref, parentData, false, connection_info.server_name, connection_info.database_name, connection_info.role || connection_info.user);
-            showQueryTool.launchQueryTool(pgWindow.pgAdmin.Tools.SQLEditor, transId, qtUrl, title, {
-                user: connection_info.user,
-                role: connection_info.role,
-                sql_id: sqlId
-              });
-
-            localStorage.setItem(sqlId, query_data);
-            oldTransId.push(qt_info.old_trans_id)
+        if(res.data.success && res.data.data.result.length > 0){
+          //let oldIds = []
+          _.each(res.data.data.result, function(tool_data){
+            if (tool_data.tool_name == 'sqleditor'){
+              console.log('Need to launch qt');
+              showQueryTool.relaunchSqlTool(tool_data);
+              //oldIds.push(tool_data.id);
+            }else if(tool_data.tool_name == 'psql'){
+              relaunchPsqlTool(tool_data);
+            }else if(tool_data.tool_name == 'ERD'){
+              relaunchErdTool(tool_data);
+            }else if(tool_data.tool_name == 'schema_diff'){
+              relaunchSchemaDiff(tool_data);
+            }
           })
 
           // call clear query data for which query tool has been launched.
           try {
-            getApiInstance().delete(url_for('sqleditor.delete_query_tool_data'), {
-              data: {
-                'oldTransId': oldTransId
-              }
+            getApiInstance().delete(url_for('settings.delete_pgadmin_state'), {
             });
           } catch (error) {
             console.error(error);
             pgAdmin.Browser.notifier.error(gettext('Failed to remove query data.') + parseApiError(error));
           }
 
-
         }
+
+        // const prefStore = usePreferences.getState();
+        // let browserPref = prefStore.getPreferencesForModule('browser');
+        // if(res.data.success && res.data.data.length > 0){
+        //   // Open query tools
+        //   let oldTransId = []
+        //   _.each(res.data.data, function(qt_info){
+        //     let connection_info = qt_info.connection_info,
+        //       query_data = qt_info.query_data;
+        //     let parentData = {
+        //       server_group: {
+        //         _id: connection_info.sgid || 0,
+        //       },
+        //       server: {
+        //         _id: connection_info.sid,
+        //       },
+        //       database: {
+        //         _id: connection_info.did,
+        //         label: connection_info.database_name,
+        //         _label: connection_info.database_name,
+        //       },
+        //     };
+
+        //     const transId = commonUtils.getRandomInt(1, 9999999);
+        //     const qtUrl = showQueryTool.generateUrl(transId, parentData, null);
+        //     let sqlId = `old_qt_data${transId}`;
+        //     const title = getTitle(pgAdmin, browserPref, parentData, false, connection_info.server_name, connection_info.database_name, connection_info.role || connection_info.user);
+        //     showQueryTool.launchQueryTool(pgWindow.pgAdmin.Tools.SQLEditor, transId, qtUrl, title, {
+        //         user: connection_info.user,
+        //         role: connection_info.role,
+        //         sql_id: sqlId
+        //       });
+
+        //     localStorage.setItem(sqlId, query_data);
+        //     oldTransId.push(qt_info.old_trans_id)
+        //   })
+
+        //   // call clear query data for which query tool has been launched.
+        //   try {
+        //     getApiInstance().delete(url_for('sqleditor.delete_query_tool_data'), {
+        //       data: {
+        //         'oldTransId': oldTransId
+        //       }
+        //     });
+        //   } catch (error) {
+        //     console.error(error);
+        //     pgAdmin.Browser.notifier.error(gettext('Failed to remove query data.') + parseApiError(error));
+        //   }
+
+
+        // }
 
       }).catch(function(error) {
         pgAdmin.Browser.notifier.pgRespErrorNotify(error);

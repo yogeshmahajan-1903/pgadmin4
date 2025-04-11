@@ -7,16 +7,12 @@
 //
 //////////////////////////////////////////////////////////////
 import PropTypes from 'prop-types';
-
 import React, { useContext, useState, useEffect } from 'react';
-
 import { Box, Grid, Typography } from '@mui/material';
-
 import { InputSelect } from '../../../../../static/js/components/FormComponents';
 import { SchemaDiffEventsContext } from './SchemaDiffComponent';
 import { SCHEMA_DIFF_EVENT } from '../SchemaDiffConstants';
-import { usePgAdmin } from '../../../../../static/js/PgAdminProvider';
-
+import { useDelayDebounce } from '../../../../../static/js/custom_hooks';
 
 export function InputComponent({ label, serverList, databaseList, schemaList, diff_type, selectedSid = null, selectedDid=null, selectedScid=null, onServerSchemaChange }) {
   const [selectedServer, setSelectedServer] = useState(selectedSid);
@@ -25,7 +21,6 @@ export function InputComponent({ label, serverList, databaseList, schemaList, di
   const eventBus = useContext(SchemaDiffEventsContext);
   const [disableDBSelection, setDisableDBSelection] = useState(selectedSid == null);
   const [disableSchemaSelection, setDisableSchemaSelection] = useState(selectedDid == null);
-  const pgAdmin = usePgAdmin();
 
   useEffect(() => {
     setSelectedDatabase(selectedDid);
@@ -43,8 +38,11 @@ export function InputComponent({ label, serverList, databaseList, schemaList, di
       setDisableSchemaSelection(true);
     }
     eventBus.fireEvent(SCHEMA_DIFF_EVENT.TRIGGER_SELECT_SERVER, { selectedOption, diff_type, serverList });
-    pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { selectedOption, diff_type, serverList });
+    //save_schema_diff_state();
+    //pgAdminProvider.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { 'trans_id': params.transId, 'tool_data': {diff_type, selectedOption }, 'tool_name': 'schema_diff'});
   };
+
+  useDelayDebounce(changeServer, selectedSid, 500)
 
   const changeDatabase = (selectedDB) => {
     setSelectedDatabase(selectedDB);
@@ -55,14 +53,16 @@ export function InputComponent({ label, serverList, databaseList, schemaList, di
       setDisableSchemaSelection(true);
     }
     eventBus.fireEvent(SCHEMA_DIFF_EVENT.TRIGGER_SELECT_DATABASE, {selectedServer, selectedDB, diff_type, databaseList});
-    pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { selectedServer, selectedDB, diff_type, databaseList });
+    //save_schema_diff_state();
+    //pgAdminProvider.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { 'trans_id': params.transId, 'tool_data': {diff_type, selectedServer, selectedDB}, 'tool_name': 'schema_diff' });
     onServerSchemaChange();
   };
 
   const changeSchema = (selectedSC) => {
     setSelectedSchema(selectedSC);
     eventBus.fireEvent(SCHEMA_DIFF_EVENT.TRIGGER_SELECT_SCHEMA, { selectedSC, diff_type });
-    pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { selectedSC, diff_type });
+    //save_schema_diff_state();
+    //pgAdminProvider.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { 'trans_id': params.transId, 'tool_data': {diff_type, selectedServer, selectedDatabase, selectedSC }, 'tool_name': 'schema_diff'});
     onServerSchemaChange();
   };
 

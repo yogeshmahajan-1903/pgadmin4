@@ -92,30 +92,29 @@ def panel(trans_id):
     Return panel template for PSQL tools.
     :param trans_id:
     """
-    params = {
-        'trans_id': trans_id,
-        'title': request.form['title']
-    }
+    params = None
+
+    if request.args:
+        params = {k: v for k, v in request.args.items()}
+
+    if request.form:
+        for key, val in request.form.items():
+            params[key] = val
+
+    params['trans_id'] = trans_id
+    params['is_enable'] = config.ENABLE_PSQL
+    params['title'] = underscore_escape(params['title'])
+    params['user'] = underscore_escape(params['user'])
+    params['platform'] =  _platform
+
+
     if 'sid_soid_mapping' not in app.config:
         app.config['sid_soid_mapping'] = dict()
-    if request.args:
-        params.update({k: v for k, v in request.args.items()})
 
     data = _get_database_role(params['sid'], params['did'])
-
-    params = {
-        'trans_id': trans_id,
-        'sid': params['sid'],
-        'db': underscore_escape(data['db_name']),
-        'server_type': params['server_type'],
-        'is_enable': config.ENABLE_PSQL,
-        'title': underscore_escape(params['title']),
-        'theme': params['theme'],
-        'o_db_name': underscore_escape(data['db_name']),
-        'role': underscore_escape(data['role']),
-        'platform': _platform
-    }
-
+    params['db'] =  underscore_escape(data['db_name'])
+    params['role'] =  underscore_escape(data['role'])
+    params['o_db_name'] =  underscore_escape(data['db_name'])
     set_env_variables(is_win=_platform == 'win32')
     return render_template("psql/index.html",
                            params=json.dumps(params))

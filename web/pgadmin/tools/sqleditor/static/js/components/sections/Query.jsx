@@ -17,7 +17,6 @@ import ConfirmSaveContent from '../../../../../../static/js/Dialogs/ConfirmSaveC
 import gettext from 'sources/gettext';
 import { isMac } from '../../../../../../static/js/keyboard_shortcuts';
 import { checkTrojanSource, isShortcutValue, parseKeyEventValue, parseShortcutValue } from '../../../../../../static/js/utils';
-import getApiInstance, { parseApiError } from '../../../../../../static/js/api_instance';
 import { usePgAdmin } from '../../../../../../static/js/PgAdminProvider';
 import ConfirmPromotionContent from '../dialogs/ConfirmPromotionContent';
 import ConfirmExecuteQueryContent from '../dialogs/ConfirmExecuteQueryContent';
@@ -25,8 +24,6 @@ import usePreferences from '../../../../../../preferences/static/js/store';
 import { getTitle } from '../../sqleditor_title';
 import PropTypes from 'prop-types';
 import { MODAL_DIALOGS } from '../QueryToolConstants';
-import {useInterval } from '../../../../../../static/js/custom_hooks';
-import { debounce } from 'lodash';
 
 
 async function registerAutocomplete(editor, api, transId) {
@@ -431,7 +428,6 @@ export default function Query({onTextSelect, setQtStatePartial}) {
     eventBus.fireEvent(QUERY_TOOL_EVENTS.QUERY_CHANGED, editor.current.isDirty());
 
     const debouncedSave = () => {
-      console.log('Debounced event');
       if (debounceTimeout.current) {
         clearTimeout(debounceTimeout.current);
       }
@@ -445,7 +441,9 @@ export default function Query({onTextSelect, setQtStatePartial}) {
         }
         pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', data);
       }, 500)};
-      debouncedSave();
+      if(editor.current.isDirty()){
+        debouncedSave();
+      }
 
     if(!queryToolCtx.params.is_query_tool && editor.current.isDirty()){
       if(queryToolCtx.preferences.sqleditor.view_edit_promotion_warning){

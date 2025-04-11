@@ -32,6 +32,7 @@ import { ResultGridComponent } from './ResultGridComponent';
 import { openSocket, socketApiGet } from '../../../../../static/js/socket_instance';
 import { parseApiError } from '../../../../../static/js/api_instance';
 import { usePgAdmin } from '../../../../../static/js/PgAdminProvider';
+import { useDelayDebounce } from '../../../../../static/js/custom_hooks';
 
 
 function generateFinalScript(script_array, scriptHeader, script_body) {
@@ -132,6 +133,16 @@ export function SchemaDiffCompare({ params }) {
       });
 
       setSourceGroupServerList(groupedOptions);
+      if(params.params.tool_data){
+        let data = JSON.parse(params.params.tool_data);
+        _.each(data,(d)=>{
+          if(d.diff_type == TYPE.SOURCE){
+            setSelectedSourceDid(d.selectedSourceSid);
+          }else{
+            //setSelectedTargetSid(d.selectedTargetSid);
+          }
+        });
+      }
     }).catch((err) => {
       pgAdmin.Browser.notifier.alert(err.message);
     });
@@ -144,7 +155,6 @@ export function SchemaDiffCompare({ params }) {
 
     eventBus.registerListener(
       SCHEMA_DIFF_EVENT.TRIGGER_SELECT_DATABASE, triggerSelectDatabase);
-
 
     eventBus.registerListener(
       SCHEMA_DIFF_EVENT.TRIGGER_SELECT_SCHEMA, triggerSelectSchema);
@@ -159,6 +169,23 @@ export function SchemaDiffCompare({ params }) {
       SCHEMA_DIFF_EVENT.TRIGGER_GENERATE_SCRIPT, triggerGenerateScript);
 
   }, []);
+
+  useEffect(()=>{
+    console.log(params)
+    console.log(selectedSourceSid);
+    if(params.params.tool_data){
+      let data = JSON.parse(params.params.tool_data);
+      _.each(data,(d)=>{
+        if(d.diff_type == TYPE.SOURCE){
+          setSelectedSourceSid(d.selectedSourceSid);
+          //setSelectedSourceDid(d.selectedSourceDid);
+        }else{
+          setSelectedTargetDid(d.selectedTargetDid)
+        }});
+    }
+  },[selectedSourceSid, selectedTargetSid])
+
+  useDelayDebounce(save_schema_diff_state, {}, 500);
 
   function checkAndSetSourceData(diff_type, selectedOption) {
     if(selectedOption == null) {
@@ -683,7 +710,16 @@ export function SchemaDiffCompare({ params }) {
     }
     return opt;
   }
-  console.log(params);
+
+  function save_schema_diff_state(){
+    pgAdmin.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', {
+      'trans_id': params.transId,  
+      'tool_data': [
+        { diff_type: TYPE.SOURCE, selectedSourceSid: selectedSourceSid, selectedSourceDid, selectedSourceDid, selectedSourceScid: selectedSourceScid}, 
+        { diff_type: TYPE.TARGET, selectedTargetSid:selectedTargetSid, selectedTargetDid:selectedTargetDid, selectedTargetScid:selectedTargetScid }, 
+      ],
+      'tool_name': 'schema_diff'})
+  }
   return (
     <>
       <Loader message={loaderText} style={{fontWeight: 900}}></Loader>

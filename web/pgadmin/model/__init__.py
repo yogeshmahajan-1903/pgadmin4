@@ -347,7 +347,7 @@ class QueryHistoryModel(db.Model):
     last_updated_flag = db.Column(db.String(), nullable=False)
 
 
-class PgadminStateDataModel(db.Model):
+class PgadminStateData(db.Model):
     """Define the history SQL table."""
     __tablename__ = 'pgadmin_state_data'
     uid = db.Column(db.Integer(), db.ForeignKey(USER_ID), nullable=False, primary_key=True)

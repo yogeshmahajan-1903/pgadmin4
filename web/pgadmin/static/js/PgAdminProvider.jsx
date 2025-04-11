@@ -26,8 +26,8 @@ export function PgAdminProvider({children, value}) {
 
   React.useEffect(()=>{
   eventBus.current.registerListener('SAVE_TOOL_DATA', (data) => {
-    console.log('Listened SAVE_TOOL_DATA');
-    console.log(data);
+    //console.log('Listened SAVE_TOOL_DATA');
+    //console.log(data);
     getApiInstance().post(
               url_for('settings.save_pgadmin_state'),
               JSON.stringify(data),

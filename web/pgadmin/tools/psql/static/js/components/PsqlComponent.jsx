@@ -7,7 +7,7 @@
 //
 //////////////////////////////////////////////////////////////
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { Box, styled, useTheme } from '@mui/material';
 import url_for from 'sources/url_for';
 import PropTypes from 'prop-types';
@@ -20,8 +20,8 @@ import { io } from 'socketio';
 import { copyToClipboard } from '../../../../../static/js/clipboard';
 import 'pgadmin.browser.keyboard';
 import gettext from 'sources/gettext';
-import getApiInstance from '../../../../../static/js/api_instance';
-
+import { usePgAdmin } from '../../../../../static/js/PgAdminProvider';
+import { useDelayDebounce } from '../../../../../static/js/custom_hooks';
 
 const Root = styled(Box)(()=>({
   width: '100%',
@@ -142,10 +142,11 @@ export default function  PsqlComponent({ params, pgAdmin }) {
   const theme = useTheme();
   const termRef = React.useRef(null);
   const containerRef = React.useRef(null);
+  const [isPsqlTerminalReady, setIsPsqlTerminalReady] = useState(false);
 
   const debounceTimeout = useRef(null); 
+  const pgAdminProvider = usePgAdmin();
   const debouncedInputHandler = useCallback((term_data, params) => {
-    console.log(params);
     // Clear the previous timeout, if any
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
@@ -160,10 +161,7 @@ export default function  PsqlComponent({ params, pgAdmin }) {
         'tool_data': term_data,
         'connection_info':params
       }
-          getApiInstance().post(
-                    url_for('settings.save_pgadmin_state'),
-                    JSON.stringify(data),
-                  ).catch((error)=>{console.error(error);});
+      pgAdminProvider.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', data);
     }, 500);
   }, []);
 
@@ -210,22 +208,44 @@ export default function  PsqlComponent({ params, pgAdmin }) {
     }
   };
 
+  const loadData = ()=>{
+    let toolData = localStorage.getItem(params.sql_id);
+    console.log(toolData);
+    localStorage.removeItem(params.sql_id);
+    if (toolData && termRef.current) {
+      termRef.current.write(toolData);
+    }
+  };
+
+  // useEffect(()=>{
+  //   console.log(isPsqlTerminalReady);
+  //   if(isPsqlTerminalReady)
+  //     loadData()
+  // },[isPsqlTerminalReady]);
+
+  useDelayDebounce(loadData, {}, 500);
+
   useEffect(()=>{
     const [term, socket] = initializePsqlTool(params);
     termRef.current = term;
-
     setTheme();
-
     termRef.current.focus();
-
-    termRef.current.focus();
-
+    setIsPsqlTerminalReady(true);
     return () => {
       term.dispose();
       socket.disconnect();
     };
 
   }, []);
+
+  // useEffect(()=>{
+  //   let toolData = localStorage.getItem(params.sql_id);
+  //   console.log(toolData);
+  //   localStorage.removeItem(params.sql_id);
+  //   if (toolData && termRef.current) {
+  //     termRef.current.write(toolData);
+  //   }
+  // },[params.sql_id]);
 
   useEffect(()=>{
     setTheme();

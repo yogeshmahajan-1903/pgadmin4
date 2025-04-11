@@ -156,18 +156,41 @@ export default class ERDTool extends React.Component {
     this.forceClose = this.closePanel;
   }
 
+  saveERDToolData = (handler) => (event) => {
+    // First, run the specific event handler
+    if (handler) handler(event);
+    // After the handler completes, fire the common event
+    setTimeout(() => {
+      console.log(this);
+      
+      console.log('fireevent');
+            let data = {
+              'tool_name': 'ERD',
+              'trans_id': this.props.params.trans_id,
+              'tool_data': this.diagram.serializeData(),
+              'connection_info': this.props.params
+            }
+                getApiInstance().post(
+                          url_for('settings.save_pgadmin_state'),
+                          JSON.stringify(data),
+                        ).catch((error)=>{console.error(error);});
+      //pgadminProvider.pgAdminProviderEventBus.fireEvent('SAVE_TOOL_DATA', { 'tool_name': 'ERD'});
+      
+    }, 500);
+  };
+
   registerModelEvents() {
     let diagramEvents = {
-      'offsetUpdated': (event)=>{
+      'offsetUpdated': this.saveERDToolData((event)=>{
         this.realignGrid({backgroundPosition: `${event.offsetX}px ${event.offsetY}px`});
         event.stopPropagation();
-      },
+      }),
       'zoomUpdated': (event)=>{
         let { gridSize } = this.diagram.getModel().getOptions();
         let bgSize = gridSize*event.zoom/100;
         this.realignGrid({backgroundSize: `${bgSize*3}px ${bgSize*3}px`});
       },
-      'nodesSelectionChanged': ()=>{
+      'nodesSelectionChanged': this.saveERDToolData((event)=>{
         let singleNodeSelected = false;
         if(this.diagram.getSelectedNodes().length == 1) {
           let metadata = this.diagram.getSelectedNodes()[0].getMetadata();
@@ -182,7 +205,7 @@ export default class ERDTool extends React.Component {
         });
         this.eventBus.fireEvent(ERD_EVENTS.SINGLE_NODE_SELECTED, singleNodeSelected);
         this.eventBus.fireEvent(ERD_EVENTS.ANY_ITEM_SELECTED, anyItemSelected);
-      },
+      }),
       'linksSelectionChanged': ()=>{
         const anyItemSelected = this.diagram.getSelectedNodes().length > 0 || this.diagram.getSelectedLinks().length > 0;
         this.setState({
