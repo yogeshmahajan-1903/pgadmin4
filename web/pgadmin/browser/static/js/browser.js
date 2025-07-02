@@ -310,7 +310,7 @@ define('pgadmin.browser', [
             let connectionInfo = toolState.connection_info;
             
             if (toolNme == 'sqleditor'){
-              showQueryTool.relaunchSqlTool(connectionInfo, toolDataId);
+              //showQueryTool.relaunchSqlTool(connectionInfo, toolDataId);
             }else{
               localStorage.setItem(toolDataId, toolState.tool_data);
               deleteToolDataIds.push(toolState.id);

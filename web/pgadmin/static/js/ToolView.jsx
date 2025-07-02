@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
 import LayoutIframeTab from './helpers/Layout/LayoutIframeTab';
 import { LAYOUT_EVENTS } from './helpers/Layout';
 import { deleteToolData } from '../../settings/static/ApplicationStateProvider';
+import { TabTitle } from './helpers/Layout';
 
 
 function ToolForm({actionUrl, params}) {
@@ -37,6 +38,40 @@ ToolForm.propTypes = {
   actionUrl: PropTypes.string,
   params: PropTypes.object,
 };
+
+export function getToolTabParams(panelId, toolUrl, formParams, tabParams, restore=false) {
+  let freshTabParams = {    
+    closable: true,
+    manualClose: true,
+        ...tabParams,}
+  
+  let restorTabParams = {
+    title: (<TabTitle id={panelId} closable={true} defaultInternal={{...tabParams}}/>),
+    internal: {
+            closable: true, 
+                manualClose: true,
+                        ...tabParams,
+    },
+  }
+  let toolTabParams =  {
+    id: panelId,
+    ...(restore ? {...restorTabParams} : {...freshTabParams}),
+    cache: false,
+    group: 'playground',
+    content: (
+      <LayoutIframeTab target={panelId} src={formParams ? undefined : toolUrl}>
+        {formParams && <ToolForm actionUrl={toolUrl} params={{...formParams, restore:restore, ...tabParams}}/>}
+      </LayoutIframeTab>
+    ),
+    metaData: {
+      toolUrl: toolUrl,
+      formParams: formParams,
+      tabParams: tabParams,
+    },
+  };
+  console.log(toolTabParams);
+  return toolTabParams
+}
 
 export default function ToolView({dockerObj}) {
   const pgAdmin = usePgAdmin();
@@ -66,20 +101,10 @@ export default function ToolView({dockerObj}) {
         });
 
         handler.focus();
-        handler.docker.openTab({
-          id: panelId,
-          title: panelId,
-          content: (
-            <LayoutIframeTab target={panelId} src={formParams ? undefined : toolUrl}>
-              {formParams && <ToolForm actionUrl={toolUrl} params={formParams}/>}
-            </LayoutIframeTab>
-          ),
-          closable: true,
-          manualClose: true,
-          ...tabParams,
-          cache: false,
-          group: 'playground'
-        }, BROWSER_PANELS.MAIN, 'middle', true);
+        handler.docker.openTab(
+          getToolTabParams(panelId, toolUrl, formParams, tabParams),
+          BROWSER_PANELS.MAIN, 'middle', true
+        );
       }
     });
   }, []);
