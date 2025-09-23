@@ -62,7 +62,7 @@ jobs:
       - name: Uninstall PostgreSQL if already present on windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-           choco install -y
+           choco uninstall postgresql
         shell: cmd
       - name: Update python version
         uses: actions/setup-python@v5
