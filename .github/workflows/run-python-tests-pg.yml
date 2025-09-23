@@ -65,7 +65,7 @@ jobs:
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version %PG_VERSION%.
           ECHO pg_config
-          if exist "C:\Program Files\PostgreSQL\%PG_VERSION%\uninstall-postgresql.exe" (
+          if exist "C:\Program Files\PostgreSQL\16\uninstall-postgresql.exe" (
              ECHO Uninstalling PostgreSQL %PG_VERSION%
              "C:\Program Files\PostgreSQL\%PG_VERSION%\uninstall-postgresql.exe" --mode unattended
           )
