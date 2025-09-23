@@ -68,12 +68,14 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
-          ECHO Postgresql version  %PG_VERSION%.
+          ECHO Postgresql version %PG_VERSION%.
           if exist "C:\Program Files\PostgreSQL\%PG_VERSION%\uninstall-postgresql.exe" (
              echo "Uninstalling PostgreSQL %PG_VERSION%"
              "C:\Program Files\PostgreSQL\%PG_VERSION%\uninstall-postgresql.exe" --mode unattended
           )
           reg delete "HKLM\SOFTWARE\PostgreSQL" /f
+          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
+          ECHO Postgresql version again %PG_VERSION%.
         shell: cmd
 
       - name: Install platform dependencies on Windows
@@ -86,6 +88,8 @@ jobs:
 
           REM Ignore error 3010 (reboot required)
           IF %ERRORLEVEL% EQU 3010 cmd /c "exit /b 0"
+          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
+          ECHO Postgresql version %PG_VERSION%.
         shell: cmd
 
       - name: Create the tablespace directory on Linux
