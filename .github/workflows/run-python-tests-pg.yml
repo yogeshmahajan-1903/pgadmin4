@@ -151,7 +151,9 @@ jobs:
       - name: Install Python dependencies on Windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          echo "PG_CONFIG=C:\\PostgreSQL\\${{ matrix.pgver }}\\bin" >> $GITHUB_ENV
+          dir /C:\PostgreSQL\${{ matrix.pgver }}\
+          dir /C:\PostgreSQL\${{ matrix.pgver }}\bin\
+          echo "PG_CONFIG=C:\PostgreSQL\${{ matrix.pgver }}\bin\pg_config.exe" >> $GITHUB_ENV
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version 3nd timne %PG_VERSION%.
           SET LIB=C:\PostgreSQL\${{ matrix.pgver }}\lib;%LIB%
