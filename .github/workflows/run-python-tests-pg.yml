@@ -62,20 +62,7 @@ jobs:
       - name: Uninstall PostgreSQL if already present on windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
-          ECHO Postgresql version %PG_VERSION%.
-          "C:\Program Files\PostgreSQL\16\uninstall-postgresql.exe" --mode unattended
-          for /f "delims=" %%a in ('pg_config') do (
-            echo %%a
-          )
-
-          if exist "C:\Program Files\PostgreSQL\16\uninstall-postgresql.exe" (
-             ECHO Uninstalling PostgreSQL %PG_VERSION%
-             "C:\Program Files\PostgreSQL\%PG_VERSION%\uninstall-postgresql.exe" --mode unattended
-          )
-          reg delete "HKLM\SOFTWARE\PostgreSQL" /f
-          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
-          ECHO Postgresql version again %PG_VERSION%.
+           choco install -y
         shell: cmd
       - name: Update python version
         uses: actions/setup-python@v5
