@@ -67,19 +67,13 @@ jobs:
       - name: Uninstall PostgreSQL if already present on windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          $pgVersion = (pg_config --version -ErrorAction SilentlyContinue | ForEach-Object { ($_ -replace 'PostgreSQL\s+', '').Split('.')[0] })
-          if (![string]::IsNullOrEmpty($pgVersion)) {
-            $uninstaller = "C:\Program Files\PostgreSQL\$pgVersion\uninstall-postgresql.exe"
-            if (Test-Path $uninstaller) {
-              & $uninstaller --mode unattended
-              Write-Output "Existing postgresql uninstalled. $pgVersion"
-            }
-          }
-          else {
-            Write-Output "No PostgreSQL installation found."
-          }
+          for /f "tokens=2 delims= " %a in ('pg_config --version') do for /f "tokens=1 delims=." %b in ("%a") do set PG_VERSION=%b
+          if exist "C:\Program Files\PostgreSQL\%PG_VERSION%\uninstall-postgresql.exe" (
+             echo "Uninstalling PostgreSQL %PG_VERSION%"
+             "C:\Program Files\PostgreSQL\%PG_VERSION%\uninstall-postgresql.exe" --mode unattended
+          )
           reg delete "HKLM\SOFTWARE\PostgreSQL" /f
-        shell: pwsh
+        shell: cmd
 
       - name: Install platform dependencies on Windows
         if: ${{ matrix.os == 'windows-latest' }}
