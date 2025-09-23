@@ -67,11 +67,18 @@ jobs:
       - name: Uninstall PostgreSQL if already present on windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          if exist "C:\Program Files\PostgreSQL\{{ matrix.pgver }}\uninstall-postgresql.exe" (
-              "C:\Program Files\PostgreSQL\{{ matrix.pgver }}\uninstall-postgresql.exe" --mode unattended
+          for /f "tokens=2 delims= " %%v in ('pg_config --version 2^>nul') do set version=%%v
+          if defined version (
+            for /f "tokens=1 delims=." %%m in ("%%version%%") do set major=%%m
+            set uninstaller="C:\Program Files\PostgreSQL\%major%\uninstall-postgresql.exe"
+            if exist %uninstaller% (
+              %uninstaller% --mode unattended
+              echo Existing postgresql uninstalled.%major%
+            )
+          ) else (
+            echo No PostgreSQL installation found.
           )
           reg delete "HKLM\SOFTWARE\PostgreSQL" /f
-        shell: cmd
 
       - name: Install platform dependencies on Windows
         if: ${{ matrix.os == 'windows-latest' }}
