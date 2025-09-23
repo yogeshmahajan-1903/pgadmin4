@@ -67,16 +67,9 @@ jobs:
           ECHO postgresql-x64-%PG_VERSION%
           sc stop postgresql-x64-%PG_VERSION%
           sc delete postgresql-x64-%PG_VERSION%
-          # Attempt to uninstall via winget if installed that way
-          winget uninstall "PostgreSQL" --silent || echo "PostgreSQL not found with winget, proceeding with manual removal."
-
-          # Manual removal if winget fails or was not used
-          # Remove the main installation directory
-          rmdir /s /q "C:\Program Files\PostgreSQL\%PG_VERSION%" # Replace XX with your PostgreSQL version
-
-          # Remove the data directory if it's separate and not within the main installation
-          # This path might vary depending on how PostgreSQL was installed
-          # rmdir /s /q "C:\Program Files\PostgreSQL\%PG_VERSION%\data"
+          for /f "delims=" %%a in ('pg_config') do (
+            echo %%a
+          )
         shell: cmd
       - name: Update python version
         uses: actions/setup-python@v5
