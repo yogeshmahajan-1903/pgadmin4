@@ -155,8 +155,8 @@ jobs:
       - name: Install Python dependencies on Windows
         if: ${{ matrix.os == 'windows-2022' }}
         run: |
-          dir C:\PostgreSQL\${{ matrix.pgver }}\
-          dir C:\PostgreSQL\${{ matrix.pgver }}\bin\
+          SET LIB=C:\PostgreSQL\${{ matrix.pgver }}\lib;%LIB%
+          SET INCLUDE=C:\PostgreSQL\${{ matrix.pgver }}\include;%INCLUDE%
           python -m venv venv
           call venv\Scripts\activate.bat
           python -m pip install --upgrade pip
