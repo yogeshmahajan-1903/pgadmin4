@@ -62,7 +62,7 @@ jobs:
           echo "/opt/homebrew/opt/postgresql@${{ matrix.pgver }}/bin" >> $GITHUB_PATH
 
       - name: Install platform dependencies on Windows
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         run: |
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version 1st timne %PG_VERSION%.
@@ -79,7 +79,7 @@ jobs:
         shell: cmd
 
       - name: Uninstall PostgreSQL if already present on windows
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         run: |
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version %PG_VERSION%.
@@ -90,7 +90,7 @@ jobs:
         shell: cmd
 
       - name: get pg svc
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         run: |
           $pgService = Get-Service -Name postgresql*
           ECHO service $pgService
@@ -109,7 +109,7 @@ jobs:
           mkdir -p /opt/homebrew/var/tablespaces/${{ matrix.pgver }}
 
       - name: Create the tablespace directory on Windows
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         run: |
           mkdir "C:\PostgreSQL\${{ matrix.pgver }}\tablespaces"
           icacls "C:\PostgreSQL\${{ matrix.pgver }}\tablespaces" /grant "NETWORK SERVICE":(OI)(CI)F /T
@@ -156,7 +156,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-22.04' }}
         run: make install-python-testing
       - name: Install Python dependencies on Windows
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         run: |
           dir C:\PostgreSQL\${{ matrix.pgver }}\
           dir C:\PostgreSQL\${{ matrix.pgver }}\bin\
@@ -245,7 +245,7 @@ jobs:
           EOF
 
       - name: Create the test configuration on Windows
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         run: |
           FOR /f "delims=" %%D IN ('python -c "import os; print(os.getcwd().replace('\\', '\\\\'))"') DO SET WORKING_DIR=%%D
 
@@ -326,7 +326,7 @@ jobs:
           make check-python
 
       - name: Run the tests on Windows
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         run: |
           call venv\Scripts\activate.bat
           python web\regression\runtests.py --exclude feature_tests
