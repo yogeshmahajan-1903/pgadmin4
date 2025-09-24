@@ -155,7 +155,14 @@ jobs:
       - name: Install Python dependencies on Windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          setx PATH "%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\"
+          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
+          ECHO Postgresql version 1st timne %PG_VERSION%.
+          echo "C:\PostgreSQL\${{ matrix.pgver }}\bin" >> $env:GITHUB_PATH
+          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
+          ECHO Postgresql version 2st timne %PG_VERSION%.
+          setx /M PATH "%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\"
+          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
+          ECHO Postgresql version 3st timne %PG_VERSION%.
           SET LIB=C:\PostgreSQL\${{ matrix.pgver }}\lib;%LIB%
           SET INCLUDE=C:\PostgreSQL\${{ matrix.pgver }}\include;%INCLUDE%
           python -m venv venv
