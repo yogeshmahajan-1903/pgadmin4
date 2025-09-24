@@ -153,14 +153,16 @@ jobs:
         run: |
           dir C:\PostgreSQL\${{ matrix.pgver }}\
           dir C:\PostgreSQL\${{ matrix.pgver }}\bin\
-          echo PG_CONFIG=C:\PostgreSQL\${{ matrix.pgver }}\bin\pg_config.exe >> %GITHUB_ENV%
-          
+          SET PATH=%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version 3nd timne %PG_VERSION%.
           SET LIB=C:\PostgreSQL\${{ matrix.pgver }}\lib;%LIB%
           SET INCLUDE=C:\PostgreSQL\${{ matrix.pgver }}\include;%INCLUDE%
           python -m venv venv
           call venv\Scripts\activate.bat
+          SET PATH=%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\
+          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
+          ECHO Postgresql version 3nd timne %PG_VERSION%.
           python -m pip install --upgrade pip
           pip install wheel sphinx sphinxcontrib-youtube -r web\regression\requirements.txt
         shell: cmd
