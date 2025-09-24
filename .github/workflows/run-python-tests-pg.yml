@@ -85,10 +85,15 @@ jobs:
           for /f "delims=" %%a in ('pg_config') do (
             echo %%a
           )
-          dir C:/STRAWB~1/c/bin\
-          "C:/STRAWB~1/c/bin\uninstall-postgresql.exe" --mode unattended
         shell: cmd
 
+      - name: get pg svc
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          $pgService = Get-Service -Name postgresql*
+          ECHO service $pgService
+        shell: powershell
+        
 
       - name: Create the tablespace directory on Linux
         if: ${{ matrix.os == 'ubuntu-22.04' }}
