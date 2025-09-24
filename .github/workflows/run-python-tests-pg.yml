@@ -71,11 +71,9 @@ jobs:
 
           REM Ignore error 3010 (reboot required)
           IF %ERRORLEVEL% EQU 3010 cmd /c "exit /b 0"
+          SETX PATH=%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
-          ECHO Postgresql version %PG_VERSION%.
-          echo "PG_CONFIG=C:\PostgreSQL\${{ matrix.pgver }}\bin" >> $GITHUB_ENV
-          FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
-          ECHO Postgresql version 2nd timne %PG_VERSION%.
+          ECHO Postgresql version 3nd timne %PG_VERSION%.
         shell: cmd
 
       - name: Uninstall PostgreSQL if already present on windows
@@ -153,7 +151,7 @@ jobs:
         run: |
           dir C:\PostgreSQL\${{ matrix.pgver }}\
           dir C:\PostgreSQL\${{ matrix.pgver }}\bin\
-          SET PATH=%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\
+          SETX PATH=%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version 3nd timne %PG_VERSION%.
           python -m venv venv
