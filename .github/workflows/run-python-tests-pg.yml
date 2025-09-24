@@ -85,6 +85,8 @@ jobs:
           for /f "delims=" %%a in ('pg_config') do (
             echo %%a
           )
+          dir C:/STRAWB~1/c/bin\
+          "C:/STRAWB~1/c/bin\uninstall-postgresql.exe" --mode unattended
         shell: cmd
 
 
