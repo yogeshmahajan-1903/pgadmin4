@@ -156,8 +156,6 @@ jobs:
           SET PATH=%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version 3nd timne %PG_VERSION%.
-          SET LIB=C:\PostgreSQL\${{ matrix.pgver }}\lib;%LIB%
-          SET INCLUDE=C:\PostgreSQL\${{ matrix.pgver }}\include;%INCLUDE%
           python -m venv venv
           call venv\Scripts\activate.bat
           SET PATH=%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\
