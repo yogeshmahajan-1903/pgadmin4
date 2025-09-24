@@ -149,6 +149,19 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Add PostgreSQL bin folder to PATH
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: |
+          $pgPath = "C:\\PostgreSQL\\${{ matrix.pgver }}\\bin"
+          Write-Output $pgPath
+          Add-Content -Path $env:GITHUB_PATH -Value $pgPath
+
+      - name: Verify pg_config is on PATH
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: pg_config --version
+
       - name: Install Python dependencies on Linux and macOS
         if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-22.04' }}
         run: make install-python-testing
@@ -157,7 +170,7 @@ jobs:
         run: |
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version 1st timne %PG_VERSION%.
-          echo "C:\PostgreSQL\${{ matrix.pgver }}\bin" >> $env:GITHUB_PATH
+          echo "C:\\PostgreSQL\\${{ matrix.pgver }}\\bin" >> $env:GITHUB_PATH
           FOR /f "tokens=2 delims= " %%a in ('pg_config --version') do for /f "tokens=1 delims=." %%b in ("%%a") do set PG_VERSION=%%b
           ECHO Postgresql version 2st timne %PG_VERSION%.
           setx /M PATH "%PATH%;C:\PostgreSQL\${{ matrix.pgver }}\bin\"
